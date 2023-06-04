@@ -14,8 +14,9 @@
 extern "C"
 {
 #   include "common.h"
+#   include "offsets.h"
 #   include "iokit.h"
-#   include "v0rtex.h"
+#   include "exploit.h"
 
 extern SInt32 REALGANGSHIT_CFUserNotificationDisplayAlert(
     CFTimeInterval timeout,
@@ -131,31 +132,11 @@ int main(void)
 
         tihmstar::offsetfinder64 fi("/System/Library/Caches/com.apple.kernelcaches/kernelcache");
 
-        offsets_t *off = NULL;
-        try
-        {
-            off = get_offsets(&fi);
-        }
-        catch (tihmstar::exception &e)
-        {
-            LOG("Offset error: %s [%u]", e.what(), e.code());
-            return -1;
-        }
-        catch (std::exception &e)
-        {
-            LOG("Fatal offset error: %s", e.what());
-            return -1;
-        }
+        LOG("running sockport2...");
 
-        LOG("running v0rtex...");
-        fuck_t fu;
-        if(v0rtex(off, &fuck, &fu) != KERN_SUCCESS)
-        {
-            LOG("Kernel exploit failed, goodbye...");
-            popupTimeout(CFSTR("Kernel exploit failed"), CFSTR("Your device will reboot now..."), CFSTR("OK"), NULL, NULL, 5);
-            die();
-            return -1;
-        }
+        mach_port_t kernel_task = get_tfp0();
+        uint64_t kernel_base = get_kernel_base(kernel_task);
+
         LOG("Exploit done");
 
         popupTimeout(CFSTR("Spyware announcement"), CFSTR("Kernel has been pwned >:D"), CFSTR("noot noot"), NULL, NULL, 5);
@@ -169,8 +150,23 @@ int main(void)
 
         if(useMeridian())
         {
+            offsets_t *off = NULL;
+            try
+            {
+                off = get_offsets(&fi);
+            }
+            catch (tihmstar::exception &e)
+            {
+                LOG("Offset error: %s [%u]", e.what(), e.code());
+                return -1;
+            }
+            catch (std::exception &e)
+            {
+                LOG("Fatal offset error: %s", e.what());
+                return -1;
+            }
             offsets = off;
-            kern_return_t ret = callback(fu.ktask, fu.kbase, NULL);
+            kern_return_t ret = callback(kernel_task, kernel_base, NULL);
             if(ret != KERN_SUCCESS)
             {
                 LOG("callback: %x", ret);
@@ -180,7 +176,7 @@ int main(void)
         }
         else
         {
-            kern_return_t ret = cb(fu.ktask, fu.kbase, &fi);
+            kern_return_t ret = cb(kernel_task, kernel_base, &fi);
             if(ret != KERN_SUCCESS)
             {
                 LOG("cb: %x", ret);
@@ -188,6 +184,9 @@ int main(void)
             }
             runLaunchDaemons();
         }
+
+        _wk64(ourproc + 0x100, orig_ucred);
+        setuid(orig_uid);
 
         curl_global_cleanup();
     }
