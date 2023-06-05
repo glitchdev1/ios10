@@ -1,10 +1,12 @@
-# TotallyNotSpyware
+# TNS Sockport
+
+An updated version of TotallyNotSpyware with sockport2 exploit and updated bootstrap.
+
+[**[ Live version at lukezgd.github.io/tns-sockport ]**](https://lukezgd.github.io/tns-sockport)
 
 This program is definitely not spyware.  
 Run it on your 64-bit iOS device as soon as possible.  
 Your compliance will be rewarded.
-
-[**[ Live version at totally-not.spyware.lol ]**](https://totally-not.spyware.lol)
 
 ### Repo structure & building
 
