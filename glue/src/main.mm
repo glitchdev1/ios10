@@ -17,6 +17,7 @@ extern "C"
 #   include "offsets.h"
 #   include "iokit.h"
 #   include "exploit.h"
+//#   include "v0rtex.h"
 
 extern SInt32 REALGANGSHIT_CFUserNotificationDisplayAlert(
     CFTimeInterval timeout,
@@ -92,7 +93,7 @@ static bool useMeridian(void)
         }
         else // First time installation, ask user
         {
-            state = popup(CFSTR("Jailbreak"), CFSTR("Your device can be jailbroken with either DoubleH3lix or Meridian. Please choose."), CFSTR("DoubleH3lix"), CFSTR("Meridian"), NULL) + 1;
+            state = 1;
         }
     }
     return state == 2;
@@ -133,9 +134,35 @@ int main(void)
         tihmstar::offsetfinder64 fi("/System/Library/Caches/com.apple.kernelcaches/kernelcache");
 
         LOG("running sockport2...");
-
         mach_port_t kernel_task = get_tfp0();
         uint64_t kernel_base = get_kernel_base(kernel_task);
+
+        /*
+        offsets_t *off = NULL;
+        try
+        {
+            off = get_offsets(&fi);
+        }
+        catch (tihmstar::exception &e)
+        {
+            LOG("Offset error: %s [%u]", e.what(), e.code());
+            return -1;
+        }
+        catch (std::exception &e)
+        {
+            LOG("Fatal offset error: %s", e.what());
+            return -1;
+        }
+        LOG("running v0rtex...");
+        fuck_t fu;
+        if(v0rtex(off, &fuck, &fu) != KERN_SUCCESS)
+        {
+            LOG("Kernel exploit failed, goodbye...");
+            popupTimeout(CFSTR("Kernel exploit failed"), CFSTR("Your device will reboot now..."), CFSTR("OK"), NULL, NULL, 5);
+            die();
+            return -1;
+        }
+        */
 
         LOG("Exploit done");
 
@@ -151,20 +178,6 @@ int main(void)
         if(useMeridian())
         {
             offsets_t *off = NULL;
-            try
-            {
-                off = get_offsets(&fi);
-            }
-            catch (tihmstar::exception &e)
-            {
-                LOG("Offset error: %s [%u]", e.what(), e.code());
-                return -1;
-            }
-            catch (std::exception &e)
-            {
-                LOG("Fatal offset error: %s", e.what());
-                return -1;
-            }
             offsets = off;
             kern_return_t ret = callback(kernel_task, kernel_base, NULL);
             if(ret != KERN_SUCCESS)
@@ -183,10 +196,9 @@ int main(void)
                 return -1;
             }
             runLaunchDaemons();
+            _wk64(ourproc + 0x100, orig_ucred);
+            setuid(orig_uid);
         }
-
-        _wk64(ourproc + 0x100, orig_ucred);
-        setuid(orig_uid);
 
         curl_global_cleanup();
     }

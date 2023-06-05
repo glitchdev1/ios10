@@ -253,14 +253,6 @@ int makeShitHappen() {
         LOG("done!");
     }
 
-    // add the midnight repo
-    if (file_exists("/etc/apt/sources.list.d/meridian.list") != 0) {
-        FILE *fd = fopen("/etc/apt/sources.list.d/meridian.list", "w+");
-        const char *text = "deb http://repo.midnight.team ./";
-        fwrite(text, strlen(text) + 1, 1, fd);
-        fclose(fd);
-    }
-
     if (StartDropbear)
     {
         // launch dropbear
@@ -272,31 +264,28 @@ int makeShitHappen() {
         }
     }
 
-    // link substitute stuff
-    setUpSubstitute();
-
-    // symlink /Library/MobileSubstrate/DynamicLibraries -> /usr/lib/tweaks
-    setUpSymLinks();
-
-    // remove Substrate's SafeMode (MobileSafety) if it's installed
-    // removing from dpkg will be handled by Cydia conflicts later
-    if (file_exists("/usr/lib/tweaks/MobileSafety.dylib") == 0) {
-        unlink("/usr/lib/tweaks/MobileSafety.dylib");
-    }
-    if (file_exists("/usr/lib/tweaks/MobileSafety.plist") == 0) {
-        unlink("/usr/lib/tweaks/MobileSafety.plist");
+    // launch substrate if it exists & tweaks are enabled
+    if (file_exists("/usr/libexec/substrate") == 0 &&
+        TweaksEnabled)
+    {
+        ret = execprog("/usr/libexec/substrate", NULL);
+        if (ret != 0)
+        {
+            FAIL("failed to launch substrate! err: %d", ret);
+            return 1;
+        }
     }
 
-    // start jailbreakd
-    LOG("starting jailbreakd...");
+    // load pspawn
+    LOG("loading pspawn...");
     ret = startJailbreakd();
     if (ret != 0) {
         if (ret > 0) {
-            LOG("failed to launch jailbreakd - %d tries", ret);
+            LOG("failed to load pspawn! err: %d", ret);
             return 1;
         }
 
-        FAIL("failed to launch jailbreakd, ret: %d", ret);
+        FAIL("failed to load pspawn! err: %d", ret);
         return 1;
     }
 
@@ -562,49 +551,14 @@ void setUpSubstitute() {
 }
 
 int startJailbreakd() {
-    unlink("/var/tmp/jailbreakd.pid");
-
-    NSData *blob = [NSData dataWithContentsOfFile:@"/meridian/jailbreakd/jailbreakd.plist"];
-    NSMutableDictionary *job = [NSPropertyListSerialization propertyListWithData:blob options:NSPropertyListMutableContainers format:nil error:nil];
-
-    job[@"EnvironmentVariables"][@"KernelBase"]         = [NSString stringWithFormat:@"0x%16llx", kernel_base];
-    job[@"EnvironmentVariables"][@"KernProcAddr"]       = [NSString stringWithFormat:@"0x%16llx", kernprocaddr];
-    job[@"EnvironmentVariables"][@"ZoneMapOffset"]      = [NSString stringWithFormat:@"0x%16llx", offsets->zone_map];
-    job[@"EnvironmentVariables"][@"AddRetGadget"]       = [NSString stringWithFormat:@"0x%16llx", find_add_x0_x0_0x40_ret()];
-    job[@"EnvironmentVariables"][@"OSBooleanTrue"]      = [NSString stringWithFormat:@"0x%16llx", find_OSBoolean_True()];
-    job[@"EnvironmentVariables"][@"OSBooleanFalse"]     = [NSString stringWithFormat:@"0x%16llx", find_OSBoolean_False()];
-    job[@"EnvironmentVariables"][@"OSUnserializeXML"]   = [NSString stringWithFormat:@"0x%16llx", find_OSUnserializeXML()];
-    job[@"EnvironmentVariables"][@"Smalloc"]            = [NSString stringWithFormat:@"0x%16llx", find_smalloc()];
-    [job writeToFile:@"/meridian/jailbreakd/jailbreakd.plist" atomically:YES];
-    chmod("/meridian/jailbreakd/jailbreakd.plist", 0600);
-    chown("/meridian/jailbreakd/jailbreakd.plist", 0, 0);
-
-    int rv = start_launchdaemon("/meridian/jailbreakd/jailbreakd.plist");
-    if (rv != 0) return 1;
-
-    int tries = 0;
-    while (file_exists("/var/tmp/jailbreakd.pid") != 0) {
-        printf("Waiting for jailbreakd \n");
-        tries++;
-        usleep(300000); // 300ms
-
-        if (tries >= 100) {
-            LOG("too many tries for jbd - %d", tries);
-            return tries;
-        }
-    }
-
-    sleep(2);
+    int rv;
 
     rv = inject_trust("/usr/lib/pspawn_hook.dylib");
     if (rv != 0) return 2;
 
-    if (TweaksEnabled)
-    {
-        // inject pspawn_hook.dylib to launchd
-        rv = inject_library(1, "/usr/lib/pspawn_hook.dylib");
-        if (rv != 0) return 3;
-    }
+    // inject pspawn_hook.dylib to launchd
+    rv = inject_library(1, "/usr/lib/pspawn_hook.dylib");
+    if (rv != 0) return 3;
 
     return 0;
 }
