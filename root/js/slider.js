@@ -103,8 +103,8 @@ window.addEventListener('load', function()
     })();
 
     // Disable vertical scrolling in webapp
-    window.ontouchstart = function(e) {
-        e.preventDefault();
-        return false;
-    };
+    //window.ontouchstart = function(e) {
+    //    e.preventDefault();
+    //    return false;
+    //};
 });
