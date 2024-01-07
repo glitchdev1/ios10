@@ -14,9 +14,7 @@
 extern "C"
 {
 #   include "common.h"
-//#   include "offsets.h"
 #   include "iokit.h"
-//#   include "exploit.h"
 #   include "v0rtex.h"
 
 extern SInt32 REALGANGSHIT_CFUserNotificationDisplayAlert(
@@ -64,41 +62,6 @@ extern "C" CFOptionFlags popup(CFStringRef title, CFStringRef text, CFStringRef 
     return popupTimeout(title, text, buttonOne, buttonTwo, buttonThree, 0);
 }
 
-#define min(a, b) ((a) < (b) ? (a) : (b))
-
-static bool useMeridian(void)
-{
-    // 0 uninit
-    // 1 doubleH3lix
-    // 2 Meridian
-    static int state = 0;
-    if(state == 0)
-    {
-        char buf[0x20] = { 0 };
-        size_t len = sizeof(buf);
-        int r = sysctlbyname("hw.machine", buf, &len, NULL, 0);
-        if(r != 0)
-        {
-            LOG("sysctlbyname: %s", strerror(errno));
-            exit(-1);
-        }
-        LOG("machine: %-*s", (int)len, buf);
-        if(strncmp("iPhone9,", buf, min(8, len)) == 0 || strncmp("iPad7,", buf, min(6, len)) == 0) // No choice
-        {
-            state = 2;
-        }
-        else if(access("/.cydia_no_stash", F_OK) == 0) // Already jailbroken, detect bootstrap
-        {
-            state = access("/meridian", F_OK) == 0 ? 2 : 1;
-        }
-        else // First time installation, ask user
-        {
-            state = 2;
-        }
-    }
-    return state == 2;
-}
-
 // doubleH3lix
 extern kern_return_t cb(task_t tfp0_, kptr_t kbase, void *data);
 extern void runLaunchDaemons(void);
@@ -133,13 +96,6 @@ int main(void)
 
         tihmstar::offsetfinder64 fi("/System/Library/Caches/com.apple.kernelcaches/kernelcache");
 
-
-        /*
-        LOG("running sockport2...");
-        mach_port_t kernel_task = get_tfp0();
-        uint64_t kernel_base = get_kernel_base(kernel_task);
-        */
-
         offsets_t *off = NULL;
         try
         {
@@ -155,6 +111,7 @@ int main(void)
             LOG("Fatal offset error: %s", e.what());
             return -1;
         }
+
         LOG("running v0rtex...");
         fuck_t fu;
         if(v0rtex(off, &fuck, &fu) != KERN_SUCCESS)
@@ -164,7 +121,6 @@ int main(void)
             die();
             return -1;
         }
-
         LOG("Exploit done");
 
         popupTimeout(CFSTR("Spyware announcement"), CFSTR("Kernel has been pwned >:D"), CFSTR("noot noot"), NULL, NULL, 5);
@@ -176,31 +132,14 @@ int main(void)
             return -1;
         }
 
-        if(useMeridian())
+        offsets = off;
+        kern_return_t ret = callback(fu.ktask, fu.kbase, NULL);
+        if(ret != KERN_SUCCESS)
         {
-            offsets_t *off = NULL;
-            offsets = off;
-            kern_return_t ret = callback(fu.ktask, fu.kbase, &fi);
-            if(ret != KERN_SUCCESS)
-            {
-                LOG("callback: %x", ret);
-                return -1;
-            }
-            makeShitHappen();
+            LOG("callback: %x", ret);
+            return -1;
         }
-        else
-        {
-            //kern_return_t ret = cb(kernel_task, kernel_base, &fi);
-            kern_return_t ret = callback(fu.ktask, fu.kbase, &fi);
-            if(ret != KERN_SUCCESS)
-            {
-                LOG("cb: %x", ret);
-                return -1;
-            }
-            runLaunchDaemons();
-            //_wk64(ourproc + 0x100, orig_ucred);
-            //setuid(orig_uid);
-        }
+        makeShitHappen();
 
         curl_global_cleanup();
     }

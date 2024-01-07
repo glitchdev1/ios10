@@ -67,13 +67,6 @@ int makeShitHappen() {
 
     fileMgr = [NSFileManager defaultManager];
 
-    if (file_exists("/private/var/lib/dpkg/status") == 0 &&
-        file_exists("/.meridian_installed") != 0)
-    {
-        POPUP("jelbrek detect !", "this device has already been jailbroken with another tool. please run Cydia Eraser to wipe your device before attempting to jailbreak with Meridian");
-        return 1;
-    }
-
     // set up stuff
     init_patchfinder(NULL);
     ret = init_amfi();
@@ -273,7 +266,7 @@ int makeShitHappen() {
         ret = execprog("/usr/libexec/substrate", NULL);
         if (ret != 0)
         {
-            FAIL("failed to launch substrate! err: %d", ret);
+            FAIL("failed to launch substrate! restart the device and try again. err: %d", ret);
             return 1;
         }
     }
