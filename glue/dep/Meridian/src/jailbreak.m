@@ -128,14 +128,16 @@ int makeShitHappen() {
     // Bootstrap is not installed/missing, download it 
     if (file_exists("/meridian/.bootstrap") != 0 ||
         file_exists("/meridian/bootstrap/meridian-bootstrap.tar") != 0 ||
-        file_exists("/meridian/bootstrap/tar") != 0) {
+        file_exists("/meridian/bootstrap/tar") != 0 ||
+        file_exists("/Applications/Zebra.app/Zebra") != 0 ||
+        file_exists("/var/lib/dpkg/status") != 0) {
         // clear out temp dir before downloading 
         [fileMgr removeItemAtPath:@"/tmp/Meridian" error:nil];
 
         // download bootstrap files from remote server
         ret = grabBootstrapFiles();
         if (ret != 0) {
-            FAIL("failed to grab teh bootstrip files! ret: %d\npls make sure u have internets", ret);
+            FAIL("failed to grab teh bootstrap files! ret: %d\npls make sure u have internets", ret);
             return 1;
         }
 

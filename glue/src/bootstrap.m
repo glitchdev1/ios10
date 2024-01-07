@@ -13,7 +13,7 @@
 
 #include "bootstrap.h"
 
-#define BASE_URL "https://lukezgd.github.io/tns-sockport/root/bootstrap/"
+#define BASE_URL "https://lukezgd.github.io/MeridianFix/root/bootstrap/"
 
 int downloadAndExtract(const char *file, const char *path, const char *dir)
 {

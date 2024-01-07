@@ -1,12 +1,11 @@
-# TNS Sockport
+# TNS MeridianFix
 
-An updated version of TotallyNotSpyware with sockport2 exploit and updated bootstrap.
+An updated version of TotallyNotSpyware with changes from Meridian's `substrate` branch and an updated bootstrap.
 
-- Replaced v0rtex with sockport2 for better reliability
+- Uses Cydia Substrate instead of Substitute for tweak injection and compatibility
 - Installs Zebra v1.1.33 instead of Cydia on initial installation
-- Disabled Meridian, A10 users can use [MeridianFix v0.9-008](https://github.com/LukeZGD/MeridianFix/releases/tag/v0.9-008) instead
 
-[**[ Live version at lukezgd.github.io/tns-sockport ]**](https://lukezgd.github.io/tns-sockport)
+[**[ Live version at lukezgd.github.io/MeridianFix ]**](https://lukezgd.github.io/MeridianFix)
 
 This program is definitely not spyware.  
 Run it on your 64-bit iOS device as soon as possible.  
