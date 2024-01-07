@@ -14,43 +14,6 @@ window.onerror = function(ev)
 {
     alert('Uncaught error: ' + ev);
 };
-
-window.onload = function()
-{
-    let x = document.getElementById("date");
-    // device detection code from https://github.com/joyqi/mobile-device-js
-    let canvas = document.createElement('canvas');
-    let gl = canvas.getContext('experimental-webgl');
-    let debugInfo = gl.getExtension('WEBGL_debug_renderer_info');
-    let glRenderer = gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL);
-    x.innerHTML = glRenderer;
-    let result = glRenderer.match(/Apple A10/);
-    if (result)
-    {
-        document.title = 'Incompatible Spyware';
-        var body = document.body;
-        while(body.firstChild)
-        {
-            body.removeChild(body.firstChild);
-        }
-        var center = document.createElement('div');
-        center.className = 'center';
-        center.appendChild(document.createElement('h1')).textContent = 'Hello from the NSA!';
-        center.appendChild(document.createElement('h2')).textContent = "Unfortunately this spyware is only compatible with A7 to A9. You're not on that device, so don't try it. At all. It will break something. Seriously. Forget we said anything.";
-        body.appendChild(center);
-        body.className = 'incompatible';
-
-        window.ontouchmove  = undefined;
-        window.ontouchend   = undefined;
-        window.onmousemove  = undefined;
-        window.onmouseup    = undefined;
-        window.ontouchstart = function(e)
-        {
-            e.preventDefault();
-            return false;
-        };
-    }
-};
 </script>
 <!--mergestart-->
 <script src="root/js/utils.js"></script>
@@ -63,7 +26,7 @@ window.onload = function()
 <body style="background:#000;">
     <header class="block">
         <div class="time">TNS Sockport</div>
-        <div class="date" id="date"></div>
+        <div class="date">I recommend using <a href="https://github.com/LukeZGD/MeridianFix">MeridianFix</a> instead</div>
     </header>
     <div id="main">
         <img id="logo" src="root/img/amazing.png" alt="logo">

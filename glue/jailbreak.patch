@@ -1,4 +1,4 @@
 791c791
 <     if(![[NSFileManager defaultManager] fileExistsAtPath:@"/Applications/Cydia.app/"])
 ---
->     if(![[NSFileManager defaultManager] fileExistsAtPath:@"/Applications/Cydia.app/"] && ![[NSFileManager defaultManager] fileExistsAtPath:@"/Applications/Zebra.app/"])
+>     if(![[NSFileManager defaultManager] fileExistsAtPath:@"/Applications/Zebra.app/"] || ![[NSFileManager defaultManager] fileExistsAtPath:@"/var/lib/dpkg/"])
