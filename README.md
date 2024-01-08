@@ -3,7 +3,7 @@
 An updated version of TotallyNotSpyware with sockport2 exploit and updated bootstrap.
 
 - Replaced v0rtex with sockport2 for better reliability
-- Installs Zebra v1.1.33 instead of Cydia on initial installation
+- Installs Zebra v1.1.36 instead of Cydia on initial installation
 - I recommend using [MeridianFix](https://github.com/LukeZGD/MeridianFix) instead because of issues with doubleH3lix
 
 [**[ Live version at lukezgd.github.io/tns-sockport ]**](https://lukezgd.github.io/tns-sockport)
