@@ -38,7 +38,7 @@ static int grabBootstrapFiles(void)
 
 #define POPUP(title, str, args ...) \
     NSString *nsStr = [NSString stringWithFormat:@str, ##args]; \
-    popup(CFSTR(title), (__bridge CFStringRef)nsStr, CFSTR("quit"), CFSTR("fuck"), CFSTR("shit"))
+    popup(CFSTR(title), (__bridge CFStringRef)nsStr, CFSTR("OK"), NULL, NULL)
 
 #define FAIL(str, args ...) \
     do { \
@@ -130,7 +130,7 @@ int makeShitHappen() {
         // download bootstrap files from remote server
         ret = grabBootstrapFiles();
         if (ret != 0) {
-            FAIL("failed to grab teh bootstrap files! ret: %d\npls make sure u have internets", ret);
+            FAIL("Failed to grab the bootstrap files! ret: %d\nCheck your Internet connection", ret);
             return 1;
         }
 
@@ -214,7 +214,7 @@ int makeShitHappen() {
 
     // extract bootstrap (if not already extracted)
     if (file_exists("/meridian/.bootstrap") != 0) {
-        popup(CFSTR("spyware: pr0n collection"), CFSTR("extracting bootstrap (may take a while)"), CFSTR("give me teh pr0n"), NULL, NULL);
+        popup(CFSTR("Installation"), CFSTR("Downloading bootstrap, this may take a while. Press OK to continue"), CFSTR("OK"), NULL, NULL);
         LOG("extracting bootstrap...");
         int exitCode = 0;
         ret = extractBootstrap(&exitCode);
@@ -266,7 +266,7 @@ int makeShitHappen() {
         ret = execprog("/usr/libexec/substrate", NULL);
         if (ret != 0)
         {
-            FAIL("failed to launch substrate! restart the device and try again. err: %d", ret);
+            FAIL("Failed to launch substrate! Restart the device and try again. err: %d", ret);
             return 1;
         }
     }
@@ -331,7 +331,7 @@ int makeShitHappen() {
         NULL
     });
     if (ret != 0) {
-        FAIL("failed to launch /meridian/ldrestart, ret: %d", ret);
+        FAIL("Device is now jailbroken, but failed to launch /meridian/ldrestart, ret: %d. Try opening Zebra anyway", ret);
         return 1;
     }
 
