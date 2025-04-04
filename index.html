@@ -14,6 +14,16 @@ window.onerror = function(ev)
 {
     alert('Uncaught error: ' + ev);
 };
+// from https://github.com/joyqi/mobile-device-js
+canvas = document.createElement('canvas');
+gl = canvas.getContext('experimental-webgl');
+debugInfo = gl.getExtension('WEBGL_debug_renderer_info');
+glRenderer = debugInfo == null ? 'unknown' : gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL);
+window.onload = function() {
+    if (glRenderer.includes("A10")) {
+        window.location.replace('https://lukezgd.github.io/MeridianFix');
+    }
+};
 </script>
 <!--mergestart
 <script src="root/js/utils.js"></script>
