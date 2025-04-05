@@ -32,7 +32,7 @@ extern int downloadAndExtract(const char *file, const char *path, const char *di
 
 static int grabBootstrapFiles(void)
 {
-    return downloadAndExtract("Meridian.tar.xz", "/tmp/Meridian.tar.xz", "/tmp/Meridian");
+    return downloadAndExtract("Meridia2.tar.xz", "/tmp/Meridia2.tar.xz", "/tmp/Meridian");
 }
 #endif
 
