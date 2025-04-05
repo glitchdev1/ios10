@@ -324,14 +324,10 @@ int makeShitHappen() {
 
     great_success = TRUE;
 
-    LOG("reloading userland...");
-    ret = execprog("/meridian/nohup", (const char **)&(const char*[]) {
-        "/meridian/nohup",
-        "/meridian/ldrestart",
-        NULL
-    });
+    LOG("respring...");
+    ret = respring();
     if (ret != 0) {
-        FAIL("Device is now jailbroken, but failed to launch /meridian/ldrestart, ret: %d. Try opening Zebra anyway", ret);
+        FAIL("Device is now jailbroken, but failed to respring, ret: %d. Try opening Zebra anyway", ret);
         return 1;
     }
 
