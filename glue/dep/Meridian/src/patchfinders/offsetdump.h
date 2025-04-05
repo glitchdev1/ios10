@@ -11,6 +11,6 @@
 
 #include "offsetfinder.h"
 
-void dumpOffsetsToFile(offsets_t *offsets, uint64_t kernel_base, uint64_t kernel_slide);
+void dumpOffsetsToFile(offsets_t *offsets, uint64_t kernel_base, uint64_t kernel_slide, uint64_t kernprocaddr);
 
 #endif /* offsetdump_h */

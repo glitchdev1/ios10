@@ -191,7 +191,7 @@ int makeShitHappen() {
     }
 
     // dump offsets to file for later use (/meridian/offsets.plist)
-    dumpOffsetsToFile(offsets, kernel_base, kslide);
+    dumpOffsetsToFile(offsets, kernel_base, kslide, kernprocaddr);
     
     // load prefs from /meridian/preferences.plist file 
     initAllPreferences();
@@ -558,21 +558,6 @@ void setUpSubstitute() {
 
 int startJailbreakd() {
     unlink("/var/tmp/jailbreakd.pid");
-
-    NSData *blob = [NSData dataWithContentsOfFile:@"/meridian/jailbreakd/jailbreakd.plist"];
-    NSMutableDictionary *job = [NSPropertyListSerialization propertyListWithData:blob options:NSPropertyListMutableContainers format:nil error:nil];
-
-    job[@"EnvironmentVariables"][@"KernelBase"]         = [NSString stringWithFormat:@"0x%16llx", kernel_base];
-    job[@"EnvironmentVariables"][@"KernProcAddr"]       = [NSString stringWithFormat:@"0x%16llx", kernprocaddr];
-    job[@"EnvironmentVariables"][@"ZoneMapOffset"]      = [NSString stringWithFormat:@"0x%16llx", offsets->zone_map];
-    job[@"EnvironmentVariables"][@"AddRetGadget"]       = [NSString stringWithFormat:@"0x%16llx", find_add_x0_x0_0x40_ret()];
-    job[@"EnvironmentVariables"][@"OSBooleanTrue"]      = [NSString stringWithFormat:@"0x%16llx", find_OSBoolean_True()];
-    job[@"EnvironmentVariables"][@"OSBooleanFalse"]     = [NSString stringWithFormat:@"0x%16llx", find_OSBoolean_False()];
-    job[@"EnvironmentVariables"][@"OSUnserializeXML"]   = [NSString stringWithFormat:@"0x%16llx", find_OSUnserializeXML()];
-    job[@"EnvironmentVariables"][@"Smalloc"]            = [NSString stringWithFormat:@"0x%16llx", find_smalloc()];
-    [job writeToFile:@"/meridian/jailbreakd/jailbreakd.plist" atomically:YES];
-    chmod("/meridian/jailbreakd/jailbreakd.plist", 0600);
-    chown("/meridian/jailbreakd/jailbreakd.plist", 0, 0);
 
     int rv = start_launchdaemon("/meridian/jailbreakd/jailbreakd.plist");
     if (rv != 0) return 1;
