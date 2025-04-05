@@ -1,6 +1,6 @@
 TARGET    = libMeridian.a
 DMG       = Meridian.dmg
-BOOTSTRAP = Meridian.tar.xz
+BOOTSTRAP = Meridia1.tar.xz
 SRC       = src
 INC       = headers
 OBJ       = obj

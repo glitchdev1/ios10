@@ -32,13 +32,13 @@ extern int downloadAndExtract(const char *file, const char *path, const char *di
 
 static int grabBootstrapFiles(void)
 {
-    return downloadAndExtract("Meridian.tar.xz", "/tmp/Meridian.tar.xz", "/tmp/Meridian");
+    return downloadAndExtract("Meridia1.tar.xz", "/tmp/Meridia1.tar.xz", "/tmp/Meridian");
 }
 #endif
 
 #define POPUP(title, str, args ...) \
     NSString *nsStr = [NSString stringWithFormat:@str, ##args]; \
-    popup(CFSTR(title), (__bridge CFStringRef)nsStr, CFSTR("quit"), CFSTR("fuck"), CFSTR("shit"))
+    popup(CFSTR(title), (__bridge CFStringRef)nsStr, CFSTR("OK"), NULL, NULL)
 
 #define FAIL(str, args ...) \
     do { \
@@ -66,13 +66,6 @@ int makeShitHappen() {
     }
 
     fileMgr = [NSFileManager defaultManager];
-
-    if (file_exists("/private/var/lib/dpkg/status") == 0 &&
-        file_exists("/.meridian_installed") != 0)
-    {
-        POPUP("jelbrek detect !", "this device has already been jailbroken with another tool. please run Cydia Eraser to wipe your device before attempting to jailbreak with Meridian");
-        return 1;
-    }
 
     // set up stuff
     init_patchfinder(NULL);
@@ -128,14 +121,16 @@ int makeShitHappen() {
     // Bootstrap is not installed/missing, download it 
     if (file_exists("/meridian/.bootstrap") != 0 ||
         file_exists("/meridian/bootstrap/meridian-bootstrap.tar") != 0 ||
-        file_exists("/meridian/bootstrap/tar") != 0) {
+        file_exists("/meridian/bootstrap/tar") != 0 ||
+        file_exists("/Applications/Zebra.app/Zebra") != 0 ||
+        file_exists("/var/lib/dpkg/status") != 0) {
         // clear out temp dir before downloading 
         [fileMgr removeItemAtPath:@"/tmp/Meridian" error:nil];
 
         // download bootstrap files from remote server
         ret = grabBootstrapFiles();
         if (ret != 0) {
-            FAIL("failed to grab teh bootstrip files! ret: %d\npls make sure u have internets", ret);
+            FAIL("Failed to grab the bootstrap files! ret: %d\nCheck your Internet connection", ret);
             return 1;
         }
 
@@ -219,7 +214,7 @@ int makeShitHappen() {
 
     // extract bootstrap (if not already extracted)
     if (file_exists("/meridian/.bootstrap") != 0) {
-        popup(CFSTR("spyware: pr0n collection"), CFSTR("extracting bootstrap (may take a while)"), CFSTR("give me teh pr0n"), NULL, NULL);
+        popup(CFSTR("Installation"), CFSTR("Downloading bootstrap, this may take a while. Press OK to continue"), CFSTR("OK"), NULL, NULL);
         LOG("extracting bootstrap...");
         int exitCode = 0;
         ret = extractBootstrap(&exitCode);
@@ -251,14 +246,6 @@ int makeShitHappen() {
         }
 
         LOG("done!");
-    }
-
-    // add the midnight repo
-    if (file_exists("/etc/apt/sources.list.d/meridian.list") != 0) {
-        FILE *fd = fopen("/etc/apt/sources.list.d/meridian.list", "w+");
-        const char *text = "deb http://repo.midnight.team ./";
-        fwrite(text, strlen(text) + 1, 1, fd);
-        fclose(fd);
     }
 
     if (StartDropbear)
@@ -341,13 +328,21 @@ int makeShitHappen() {
     great_success = TRUE;
 
     LOG("reloading userland...");
-    ret = execprog("/meridian/nohup", (const char **)&(const char*[]) {
-        "/meridian/nohup",
-        "/meridian/ldrestart",
+    chown("/meridian/ldrestart", 0, 0);
+    chmod("/meridian/ldrestart", 0755);
+    chown("/meridian/nohup", 0, 0);
+    chmod("/meridian/nohup", 0755);
+
+    // ldrestart restarts all launch daemons,
+    // allowing shit to be injected into 'em
+    ret = execprog("/bin/bash", (const char **)&(const char*[]) {
+        "/bin/bash",
+        "-c",
+        "/meridian/nohup /meridian/ldrestart 2>&1 >/dev/null &",
         NULL
     });
     if (ret != 0) {
-        FAIL("failed to launch /meridian/ldrestart, ret: %d", ret);
+        FAIL("Device is now jailbroken, but failed to launch /meridian/ldrestart, ret: %d. Try opening Zebra anyway", ret);
         return 1;
     }
 
@@ -599,12 +594,9 @@ int startJailbreakd() {
     rv = inject_trust("/usr/lib/pspawn_hook.dylib");
     if (rv != 0) return 2;
 
-    if (TweaksEnabled)
-    {
-        // inject pspawn_hook.dylib to launchd
-        rv = inject_library(1, "/usr/lib/pspawn_hook.dylib");
-        if (rv != 0) return 3;
-    }
+    // inject pspawn_hook.dylib to launchd
+    rv = inject_library(1, "/usr/lib/pspawn_hook.dylib");
+    if (rv != 0) return 3;
 
     return 0;
 }

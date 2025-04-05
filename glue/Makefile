@@ -4,19 +4,13 @@ INC      = include
 LIB      = lib
 OBJ      = obj
 DEP      = dep
-ifdef JIT
 GEN      = $(DEP)/jit/genesis.S
-else
-GEN      =
-endif
 DEP_C    = $(patsubst $(SRC)/%.m,%,$(wildcard $(SRC)/*.m))
 DEP_CXX  = $(patsubst $(SRC)/%.mm,%,$(wildcard $(SRC)/*.mm))
 IGXX     = xcrun -sdk iphoneos clang++ -arch arm64
 FLAGS   ?= -Wall -O3 -fobjc-arc -miphoneos-version-min=10.0 $(CFLAGS)
 LFLAGS  ?= -Wl,-x -Wl,-dead_strip -flto -L$(wildcard $(DEP)/curl-*)/lib/.libs -lcurl -L$(DEP)/Meridian -lMeridian -L$(DEP)/doubleH3lix -ldoubleH3lix -L$(LIB) -loffsetfinder64 -limg4tool -lplist++ -lplist -lcompression -lz -larchive -F. -framework IOKit -framework Security $(LDFLAGS)
-ifdef JIT
 LFLAGS  += -Wl,-exported_symbols_list,keep.txt
-endif
 FILES   := $(addsuffix .o, $(addprefix $(OBJ)/c/, $(DEP_C))) $(addsuffix .o, $(addprefix $(OBJ)/c++/, $(DEP_CXX)))
 
 .PHONY: all clean distclean
