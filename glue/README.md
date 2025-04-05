@@ -1,3 +1,3 @@
 ### Compiling
 
-- Run `make`
+- Run `git submodule update --init --recursive; make`
