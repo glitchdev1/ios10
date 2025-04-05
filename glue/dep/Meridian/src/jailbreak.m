@@ -191,7 +191,7 @@ int makeShitHappen() {
     }
 
     // dump offsets to file for later use (/meridian/offsets.plist)
-    dumpOffsetsToFile(offsets, kernel_base, kslide);
+    dumpOffsetsToFile(offsets, kernel_base, kslide, kernprocaddr);
     
     // load prefs from /meridian/preferences.plist file 
     initAllPreferences();
