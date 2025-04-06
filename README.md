@@ -2,7 +2,7 @@
 
 An updated version of TotallyNotSpyware with sockport2 exploit and updated bootstrap.
 
-- Replaced v0rtex with sockport2 for better reliability
+- Replaced v0rtex with sockport2 for better reliability (except for A9(X) devices where v0rtex is still used)
 - Installs Zebra v1.1.36 instead of Cydia on initial installation
 - Disabled Meridian, A10 users can use [MeridianFix](https://github.com/LukeZGD/MeridianFix) instead
 
