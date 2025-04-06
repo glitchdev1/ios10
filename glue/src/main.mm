@@ -64,41 +64,6 @@ extern "C" CFOptionFlags popup(CFStringRef title, CFStringRef text, CFStringRef 
     return popupTimeout(title, text, buttonOne, buttonTwo, buttonThree, 0);
 }
 
-#define min(a, b) ((a) < (b) ? (a) : (b))
-
-static bool useMeridian(void)
-{
-    // 0 uninit
-    // 1 doubleH3lix
-    // 2 Meridian
-    static int state = 0;
-    if(state == 0)
-    {
-        char buf[0x20] = { 0 };
-        size_t len = sizeof(buf);
-        int r = sysctlbyname("hw.machine", buf, &len, NULL, 0);
-        if(r != 0)
-        {
-            LOG("sysctlbyname: %s", strerror(errno));
-            exit(-1);
-        }
-        LOG("machine: %-*s", (int)len, buf);
-        if(strncmp("iPhone9,", buf, min(8, len)) == 0 || strncmp("iPad7,", buf, min(6, len)) == 0) // No choice
-        {
-            state = 2;
-        }
-        else if(access("/.cydia_no_stash", F_OK) == 0) // Already jailbroken, detect bootstrap
-        {
-            state = access("/meridian", F_OK) == 0 ? 2 : 1;
-        }
-        else // First time installation, ask user
-        {
-            state = 1;
-        }
-    }
-    return state == 2;
-}
-
 // doubleH3lix
 extern kern_return_t cb(task_t tfp0_, kptr_t kbase, void *data);
 extern void runLaunchDaemons(void);
@@ -175,28 +140,13 @@ int main(void)
             return -1;
         }
 
-        if(useMeridian())
+        kern_return_t ret = cb(fu.ktask, fu.kbase, &fi);
+        if(ret != KERN_SUCCESS)
         {
-            offsets_t *off = NULL;
-            offsets = off;
-            kern_return_t ret = callback(kernel_task, kernel_base, NULL);
-            if(ret != KERN_SUCCESS)
-            {
-                LOG("callback: %x", ret);
-                return -1;
-            }
-            makeShitHappen();
+            LOG("cb: %x", ret);
+            return -1;
         }
-        else
-        {
-            kern_return_t ret = cb(fu.ktask, fu.kbase, &fi);
-            if(ret != KERN_SUCCESS)
-            {
-                LOG("cb: %x", ret);
-                return -1;
-            }
-            runLaunchDaemons();
-        }
+        runLaunchDaemons();
 
         curl_global_cleanup();
     }
