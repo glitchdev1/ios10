@@ -22,8 +22,8 @@ glRenderer = debugInfo == null ? 'unknown' : gl.getParameter(debugInfo.UNMASKED_
 window.onload = function() {
     if (glRenderer.includes("A10")) {
         window.location.replace('https://lukezgd.github.io/MeridianFix');
-    } else if (glRenderer.includes("A9")) {
-        window.location.replace('https://lukezgd.github.io/tns-sockport/v0rtex');
+    } else if (!glRenderer.includes("A9")) {
+        window.location.replace('https://lukezgd.github.io/tns-sockport');
     }
 };
 </script>
@@ -39,7 +39,7 @@ mergeend-->
 <body style="background:#000;">
     <header class="block">
         <div class="time">TNS Sockport</div>
-        <div class="date"></div>
+        <div class="date">v0rtex build for A9(X)</div>
     </header>
     <div id="main">
         <img id="logo" src="root/img/amazing.png" alt="logo">
