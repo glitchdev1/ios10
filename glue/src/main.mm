@@ -16,8 +16,8 @@ extern "C"
 #   include "common.h"
 #   include "offsets.h"
 #   include "iokit.h"
-#   include "exploit.h"
-//#   include "v0rtex.h"
+//#   include "exploit.h"
+#   include "v0rtex.h"
 
 extern SInt32 REALGANGSHIT_CFUserNotificationDisplayAlert(
     CFTimeInterval timeout,
@@ -133,11 +133,12 @@ int main(void)
 
         tihmstar::offsetfinder64 fi("/System/Library/Caches/com.apple.kernelcaches/kernelcache");
 
+        /*
         LOG("running sockport2...");
         mach_port_t kernel_task = get_tfp0();
         uint64_t kernel_base = get_kernel_base(kernel_task);
+        */
 
-        /*
         offsets_t *off = NULL;
         try
         {
@@ -162,7 +163,6 @@ int main(void)
             die();
             return -1;
         }
-        */
 
         LOG("Exploit done");
 
@@ -189,15 +189,13 @@ int main(void)
         }
         else
         {
-            kern_return_t ret = cb(kernel_task, kernel_base, &fi);
+            kern_return_t ret = cb(fu.ktask, fu.kbase, &fi);
             if(ret != KERN_SUCCESS)
             {
                 LOG("cb: %x", ret);
                 return -1;
             }
             runLaunchDaemons();
-            _wk64(ourproc + 0x100, orig_ucred);
-            setuid(orig_uid);
         }
 
         curl_global_cleanup();
